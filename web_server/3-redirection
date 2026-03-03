@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # 3-redirection: Configure Ubuntu machine with Nginx 301 redirect
 
 set -e
