@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Install and configure Nginx web server
+
+# Update package list
+apt-get update -y
+
+# Install nginx
+apt-get install -y nginx
+
+# Create custom HTML page
+echo "Holberton School for the win!" > /var/www/html/index.nginx-debian.html
+echo "Holberton School for the win!" > /var/www/html/index.html
+
+# Ensure nginx is running (without systemctl)
+service nginx start
