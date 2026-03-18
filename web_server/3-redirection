@@ -1,14 +1,30 @@
 #!/usr/bin/env bash
-# Configures an Nginx server so that /redirect_me redirects to another page
-# The redirection is a "301 Moved Permanently"
+# Configures Nginx with a 301 redirect on /redirect_me
 
-sudo apt-get update
+sudo apt-get update -y
 sudo apt-get -y install nginx
-sudo ufw allow 'Nginx HTTP'
+
 echo "Holberton School" | sudo tee /var/www/html/index.html > /dev/null
 
-# Add redirect rule for /redirect_me using string replacement (more reliable)
-new_string="server_name _;\n\tlocation /redirect_me {\n\t\treturn 301 https://www.wilsonn.vercel.app;\n\t}\n"
-sudo sed -i "s|server_name _;|$new_string|" /etc/nginx/sites-available/default
+# Write a clean config
+sudo tee /etc/nginx/sites-available/default > /dev/null <<'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
 
-sudo service nginx restart
+    root /var/www/html;
+    index index.html index.htm;
+
+    server_name _;
+
+    location /redirect_me {
+        return 301 https://www.youtube.com/;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+EOF
+
+sudo nginx -t && sudo service nginx restart
