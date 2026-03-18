@@ -1,33 +1,14 @@
 #!/usr/bin/env bash
-# 3-redirection: Configure Ubuntu machine with Nginx 301 redirect
+# Configures an Nginx server so that /redirect_me redirects to another page
+# The redirection is a "301 Moved Permanently"
 
-set -e
+sudo apt-get update
+sudo apt-get -y install nginx
+sudo ufw allow 'Nginx HTTP'
+echo "Holberton School" | sudo tee /var/www/html/index.html > /dev/null
 
-# Variables
-TARGET_URL="https://www.youtube.com/watch?v=QH2-TGUlwu4"
-NGINX_CONF="/etc/nginx/sites-available/default"
-REDIRECT_PATH="/redirect_me"
+# Add redirect rule for /redirect_me using string replacement (more reliable)
+new_string="server_name _;\n\tlocation /redirect_me {\n\t\treturn 301 https://www.wilsonn.vercel.app;\n\t}\n"
+sudo sed -i "s|server_name _;|$new_string|" /etc/nginx/sites-available/default
 
-# 1. Update packages and install Nginx if not installed
-sudo apt update -y
-sudo apt install -y nginx
-
-# 2. Backup existing config
-sudo cp "$NGINX_CONF" "${NGINX_CONF}.bak_$(date +%F_%T)"
-
-# 3. Remove existing redirect location block if exists
-sudo sed -i "/location $REDIRECT_PATH {/,/}/d" "$NGINX_CONF"
-
-# 4. Add new redirect location block at the end of server block
-sudo sed -i "/server_name _;/a \\
-    location $REDIRECT_PATH {\\
-        return 301 $TARGET_URL;\\
-    }" "$NGINX_CONF"
-
-# 5. Test Nginx configuration
-sudo nginx -t
-
-# 6. Reload Nginx
-sudo systemctl reload nginx
-
-echo "Redirect from $REDIRECT_PATH to $TARGET_URL configured successfully!"
+sudo service nginx restart
