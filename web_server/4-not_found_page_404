@@ -1,36 +1,18 @@
 #!/usr/bin/env bash
-#4-not_found_page_404: Configure Ubuntu machine with custom 404 page
+# Configures Nginx with a custom 404 page containing "Ceci n'est pas une page"
 
-set -e
+sudo apt-get update
+sudo apt-get -y install nginx
+sudo ufw allow 'Nginx HTTP'
+echo "Holberton School" | sudo tee /var/www/html/index.html > /dev/null
 
-# Variables
-NGINX_CONF="/etc/nginx/sites-available/default"
-CUSTOM_404_PAGE="/var/www/html/custom_404.html"
+# Add redirect rule for /redirect_me
+sudo sed -i '/server_name _;/a \\tlocation /redirect_me {\n\t\treturn 301 https://www.wilsonn.vercel.app;\n\t}' /etc/nginx/sites-enabled/default
 
-# 1. Update packages and install Nginx if not installed
-sudo apt update -y
-sudo apt install -y nginx
+# Create custom 404 page
+echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html > /dev/null
 
-# 2. Create custom 404 page
-echo "Ceci n'est pas une page" | sudo tee "$CUSTOM_404_PAGE" > /dev/null
+# Add custom 404 error page directive
+sudo sed -i '/server_name _;/a \\terror_page 404 /404.html;' /etc/nginx/sites-enabled/default
 
-# 3. Backup existing config
-sudo cp "$NGINX_CONF" "${NGINX_CONF}.bak_$(date +%F_%T)"
-
-# 4. Remove existing error_page directives if present
-sudo sed -i "/error_page 404/d" "$NGINX_CONF"
-
-# 5. Add error_page directive inside the server block
-sudo sed -i "/server_name _;/a \\
-    error_page 404 /custom_404.html;\\
-    location = /custom_404.html {\\
-        internal;\\
-    }" "$NGINX_CONF"
-
-# 6. Test Nginx configuration
-sudo nginx -t
-
-# 7. Reload Nginx
-sudo systemctl reload nginx
-
-echo "Custom 404 page configured successfully!"
+sudo service nginx restart
