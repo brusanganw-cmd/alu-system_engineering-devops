@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Ensure nginx user exists
+id nginx &>/dev/null || useradd -r nginx
+
+# Fix user (handles indentation)
+sed -i 's/^\s*user .*/user nginx;/' /etc/nginx/nginx.conf
+
+# Change port
+sed -i 's/listen 80 default_server;/listen 8080 default_server;/' /etc/nginx/sites-available/default
+sed -i 's/listen \[::\]:80 default_server;/listen [::]:8080 default_server;/' /etc/nginx/sites-available/default
+
+# Restart nginx
+pkill nginx 2>/dev/null
+nginx
