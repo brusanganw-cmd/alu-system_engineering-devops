@@ -7,4 +7,4 @@ if [ $# -ne 1 ]; then
 fi
 
 # Run whoami as the given user
-sudo -u "$1" -c "whoami"
+sudo -u "$1" whoami
