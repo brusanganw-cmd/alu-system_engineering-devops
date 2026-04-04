@@ -1,15 +1,4 @@
 #!/usr/bin/env bash
-# 0-nginx_likes_port_80
-
-# Update package list and install nginx if missing
-apt-get update -qq
-apt-get install -y nginx > /dev/null 2>&1
-
-# Ensure default Nginx config listens on all IPv4 addresses
-sed -i 's/listen 80 default_server;/listen 80;/g' /etc/nginx/sites-available/default
-sed -i 's/listen \[::\]:80 default_server;/# &/g' /etc/nginx/sites-available/default
-
-# Start nginx if not running
-if ! pgrep -x "nginx" > /dev/null; then
-    nginx
-fi
+# Fix Nginx to listen on port 80 on all active IPv4 IPs
+sed -i 's/8080/80/g' /etc/nginx/sites-enabled/default
+service nginx restart
