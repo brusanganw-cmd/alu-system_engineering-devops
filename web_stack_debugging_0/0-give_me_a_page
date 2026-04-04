@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# access the container
+docker exec -it 444358e8bc31 sh
+# install apache2
+apt update
+apt install -y apache2
+# start apache2 because it is on Alpine Linux
+httpd -D FOREGROUND
+# access the page
+curl localhost
+#the message Hello Holberton should be displayed, then exit the container
+exit
+
