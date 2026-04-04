@@ -1,33 +1,30 @@
 #!/usr/bin/env bash
-# 3-redirection: Configure Ubuntu machine with Nginx 301 redirect
+# Configures Nginx with a 301 redirect on /redirect_me
 
-set -e
+sudo apt-get update -y
+sudo apt-get -y install nginx
 
-# Variables
-TARGET_URL="https://www.youtube.com/watch?v=QH2-TGUlwu4"
-NGINX_CONF="/etc/nginx/sites-available/default"
-REDIRECT_PATH="/redirect_me"
+echo "Holberton School" | sudo tee /var/www/html/index.html > /dev/null
 
-# 1. Update packages and install Nginx if not installed
-sudo apt update -y
-sudo apt install -y nginx
+# Write a clean config
+sudo tee /etc/nginx/sites-available/default > /dev/null <<'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
 
-# 2. Backup existing config
-sudo cp "$NGINX_CONF" "${NGINX_CONF}.bak_$(date +%F_%T)"
+    root /var/www/html;
+    index index.html index.htm;
 
-# 3. Remove existing redirect location block if exists
-sudo sed -i "/location $REDIRECT_PATH {/,/}/d" "$NGINX_CONF"
+    server_name _;
 
-# 4. Add new redirect location block at the end of server block
-sudo sed -i "/server_name _;/a \\
-    location $REDIRECT_PATH {\\
-        return 301 $TARGET_URL;\\
-    }" "$NGINX_CONF"
+    location /redirect_me {
+        return 301 https://www.youtube.com/;
+    }
 
-# 5. Test Nginx configuration
-sudo nginx -t
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+EOF
 
-# 6. Reload Nginx
-sudo systemctl reload nginx
-
-echo "Redirect from $REDIRECT_PATH to $TARGET_URL configured successfully!"
+sudo nginx -t && sudo service nginx restart
